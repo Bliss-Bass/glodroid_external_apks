@@ -295,12 +295,23 @@ set_custom_package_perms()
 
 }
 
-echo ${first_run}
-if [ "${first_run}" != "false" ]; then
+POST_INST=/data/vendor/post_inst_complete
+USER_APPS=/system/etc/user_app/*
+BUILD_DATETIME=$(getprop ro.build.date.utc)
+POST_INST_NUM=$(cat $POST_INST)
 
-   install_apk fenix.apk
-   install_apk fdroid.apk
-   setprop persist.glodroid.first_run false
+if [ ! "$BUILD_DATETIME" == "$POST_INST_NUM" ]; then
+	# GD apps
+	install_apk fenix.apk
+	install_apk fdroid.apk
+	# Bliss apps
+	for apk in $USER_APPS
+	do		
+		pm install $apk
+	done
+	rm "$POST_INST"
+	touch "$POST_INST"
+	echo $BUILD_DATETIME > "$POST_INST"
 fi
 
 set_custom_package_perms
