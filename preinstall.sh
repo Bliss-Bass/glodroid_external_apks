@@ -15,7 +15,7 @@ set_custom_package_perms()
 {
 	# Set up custom package permissions
 
-	current_user=$(dumpsys activity | grep mCurrentUserId | cut -d: -f2)
+	current_user="0"
 
 	# KioskLauncher
 	exists_kiosk=$(pm list packages org.blissos.kiosklauncher | grep -c org.blissos.kiosklauncher)
@@ -179,55 +179,53 @@ set_custom_package_perms()
 		# allow displaying over other apps if in Go mode
 		settings put system alert_window_bypass_low_ram 1
 
-		# Only if PC_MODE is 1
-		if [[ $PC_MODE -eq 1 || $HYBRID_PC_MODE -eq 1 ]]; then
-			
-			if [ ! -f /data/misc/sdconfig/accessibility ] && ! pm list packages | grep -q "com.blissos.setupwizard"; then
-				# set accessibility services
-				eas=$(settings get secure enabled_accessibility_services)
-				if [ -n "$eas" ]; then
-					settings put secure enabled_accessibility_services $eas:cu.axel.smartdock/cu.axel.smartdock.services.DockService
-				else
-					settings put secure enabled_accessibility_services cu.axel.smartdock/cu.axel.smartdock.services.DockService
-				fi
-				mkdir -p /data/misc/sdconfig
-				touch /data/misc/sdconfig/accessibility
-				chown 1000.1000 /data/misc/sdconfig /data/misc/sdconfig/*
-				chmod 775 /data/misc/sdconfig
-				chmod 664 /data/misc/sdconfig/accessibility
+		if [ ! -f /data/misc/sdconfig/accessibility ] && ! pm list packages | grep -q "com.blissos.setupwizard"; then
+			# set accessibility services
+			eas=$(settings get secure enabled_accessibility_services)
+			if [ -n "$eas" ]; then
+				settings put secure enabled_accessibility_services $eas:cu.axel.smartdock/cu.axel.smartdock.services.DockService
+			else
+				settings put secure enabled_accessibility_services cu.axel.smartdock/cu.axel.smartdock.services.DockService
 			fi
-			if [ ! -f /data/misc/sdconfig/notification ]; then
-				# set notification listeners
-				enl=$(settings get secure enabled_notification_listeners)
-				if [ -n "$enl" ]; then
-					settings put secure enabled_notification_listeners $enl:cu.axel.smartdock/cu.axel.smartdock.services.NotificationService
-					
-				else
-					settings put secure enabled_notification_listeners cu.axel.smartdock/cu.axel.smartdock.services.NotificationService
-				fi
-				mkdir -p /data/misc/sdconfig
-				touch /data/misc/sdconfig/notification
-				chown 1000.1000 /data/misc/sdconfig /data/misc/sdconfig/*
-				chmod 775 /data/misc/sdconfig
-				chmod 664 /data/misc/sdconfig/notification
-			fi
-			if [ ! -f /data/misc/sdconfig/admin ]; then
-				# set device admin
-				dpm set-active-admin --user current cu.axel.smartdock/android.app.admin.DeviceAdminReceiver
-				mkdir -p /data/misc/sdconfig
-				touch /data/misc/sdconfig/admin
-				chown 1000.1000 /data/misc/sdconfig /data/misc/sdconfig/*
-				chmod 775 /data/misc/sdconfig
-				chmod 664 /data/misc/sdconfig/admin
-			fi
-
-			if [ $(settings get global development_settings_enabled) == 0 ]; then
-		    	settings put global development_settings_enabled 1
-			fi
-
-			[ -n "$SET_SMARTDOCK_DEFAULT" ] && pm set-home-activity "cu.axel.smartdock/.activities.LauncherActivity" || pm set-home-activity "com.android.launcher3/.LauncherProvider"
-			
+			mkdir -p /data/misc/sdconfig
+			touch /data/misc/sdconfig/accessibility
+			chown 1000.1000 /data/misc/sdconfig /data/misc/sdconfig/*
+			chmod 775 /data/misc/sdconfig
+			chmod 664 /data/misc/sdconfig/accessibility
 		fi
+		if [ ! -f /data/misc/sdconfig/notification ]; then
+			# set notification listeners
+			enl=$(settings get secure enabled_notification_listeners)
+			if [ -n "$enl" ]; then
+				settings put secure enabled_notification_listeners $enl:cu.axel.smartdock/cu.axel.smartdock.services.NotificationService
+				
+			else
+				settings put secure enabled_notification_listeners cu.axel.smartdock/cu.axel.smartdock.services.NotificationService
+			fi
+			mkdir -p /data/misc/sdconfig
+			touch /data/misc/sdconfig/notification
+			chown 1000.1000 /data/misc/sdconfig /data/misc/sdconfig/*
+			chmod 775 /data/misc/sdconfig
+			chmod 664 /data/misc/sdconfig/notification
+		fi
+		if [ ! -f /data/misc/sdconfig/admin ]; then
+			# set device admin
+			dpm set-active-admin --user current cu.axel.smartdock/android.app.admin.DeviceAdminReceiver
+			mkdir -p /data/misc/sdconfig
+			touch /data/misc/sdconfig/admin
+			chown 1000.1000 /data/misc/sdconfig /data/misc/sdconfig/*
+			chmod 775 /data/misc/sdconfig
+			chmod 664 /data/misc/sdconfig/admin
+		fi
+
+		if [ $(settings get global development_settings_enabled) == 0 ]; then
+			settings put global development_settings_enabled 1
+		fi
+
+		# set launcher
+		SET_SMARTDOCK_DEFAULT=$(getprop persist.glodroid.set_smartdock_default)
+		[ -n "$SET_SMARTDOCK_DEFAULT" ] && pm set-home-activity "cu.axel.smartdock/.activities.LauncherActivity" || pm set-home-activity "com.android.launcher3/.LauncherProvider"
+	
 	fi
 
 	# com.farmerbb.taskbar
@@ -305,6 +303,12 @@ if [ ! "$BUILD_DATETIME" == "$POST_INST_NUM" ]; then
 	install_apk fenix.apk
 	install_apk fdroid.apk
 	# Bliss apps
+	install_apk kernelsu.apk
+	install_apk smartdock.apk
+	install_apk termux.apk
+	install_apk xtmapper.apk
+	install_apk setorientation.apk
+	# Bliss user_apps
 	for apk in $USER_APPS
 	do		
 		pm install $apk
