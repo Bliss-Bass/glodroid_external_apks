@@ -66,10 +66,29 @@ set_custom_package_perms()
 			chmod 775 /data/misc/rlconfig
 			chmod 664 /data/misc/rlconfig/admin
 		fi
-				
+		# set overlays enabled
+		settings put secure secure_overlay_settings 1
+
+		# allow displaying over other apps if in Go mode
+		settings put system alert_window_bypass_low_ram 1
+
 		pm grant com.bliss.restrictedlauncher android.permission.SYSTEM_ALERT_WINDOW
 		pm set-home-activity "com.bliss.restrictedlauncher/.activities.LauncherActivity"
 		am start -a android.intent.action.MAIN -c android.intent.category.HOME
+
+		if [ -f /data/data/com.bliss.restrictedlauncher/files/whitelist.lst ]; then
+			if [ ! -f /data/misc/rlpconfig/whitelist ]; then
+				echo -e "\ncom.android.printservice.recommendation" >> /data/data/com.bliss.restrictedlauncher/files/whitelist.lst
+				echo -e "com.android.printspooler" >> /data/data/com.bliss.restrictedlauncher/files/whitelist.lst
+				echo -e "com.android.systemui" >> /data/data/com.bliss.restrictedlauncher/files/whitelist.lst
+				echo -e "com.android.packageinstaller" >> /data/data/com.bliss.restrictedlauncher/files/whitelist.lst				
+				mkdir -p /data/misc/rlconfig
+				touch /data/misc/rlconfig/whitelist
+				chown 1000.1000 /data/misc/rlconfig /data/misc/rlconfig/*
+				chmod 775 /data/misc/rlconfig
+				chmod 664 /data/misc/rlconfig/whitelist
+			fi
+		fi
 	fi
 
 	# BlissRestrictedLauncherPro
@@ -84,10 +103,29 @@ set_custom_package_perms()
 			chmod 775 /data/misc/rlconfig
 			chmod 664 /data/misc/rlconfig/admin
 		fi
+		# set overlays enabled
+		settings put secure secure_overlay_settings 1
+
+		# allow displaying over other apps if in Go mode
+		settings put system alert_window_bypass_low_ram 1
 				
 		pm grant com.bliss.restrictedlauncher.pro android.permission.SYSTEM_ALERT_WINDOW
 		pm set-home-activity "com.bliss.restrictedlauncher.pro/com.bliss.restrictedlauncher.activities.LauncherActivity"
 		am start -a android.intent.action.MAIN -c android.intent.category.HOME
+
+		if [ -f /data/data/com.bliss.restrictedlauncher.pro/files/whitelist.lst ]; then
+			if [ ! -f /data/misc/rlpconfig/whitelist ]; then
+				echo -e "\ncom.android.printservice.recommendation" >> /data/data/com.bliss.restrictedlauncher.pro/files/whitelist.lst
+				echo -e "com.android.printspooler" >> /data/data/com.bliss.restrictedlauncher.pro/files/whitelist.lst
+				echo -e "com.android.systemui" >> /data/data/com.bliss.restrictedlauncher.pro/files/whitelist.lst
+				echo -e "com.android.packageinstaller" >> /data/data/com.bliss.restrictedlauncher.pro/files/whitelist.lst				
+				mkdir -p /data/misc/rlconfig
+				touch /data/misc/rlconfig/whitelist
+				chown 1000.1000 /data/misc/rlconfig /data/misc/rlconfig/*
+				chmod 775 /data/misc/rlconfig
+				chmod 664 /data/misc/rlconfig/whitelist
+			fi
+		fi
 	fi
 
 	# Molla Launcher
