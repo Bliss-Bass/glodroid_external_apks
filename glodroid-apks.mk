@@ -6,12 +6,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/termux.apk:$(TARGET_COPY_OUT_VENDOR)/etc/preinstall/termux.apk_all                   \
     $(LOCAL_PATH)/setorientation.apk:$(TARGET_COPY_OUT_VENDOR)/etc/preinstall/setorientation.apk_all   \
 
-ifeq ($(USE_SMARTDOCK),true)
-    PRODUCT_COPY_FILES += \
-        $(LOCAL_PATH)/smartdock.apk:$(TARGET_COPY_OUT_VENDOR)/etc/preinstall/smartdock.apk_all
-
-endif
-
 ifneq ($(BLISS_REMOVE_KSU),true)
     PRODUCT_COPY_FILES += \
         $(LOCAL_PATH)/xtmapper.apk:$(TARGET_COPY_OUT_VENDOR)/etc/preinstall/xtmapper.apk_all \
