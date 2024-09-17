@@ -138,8 +138,16 @@ set_custom_package_perms()
 	# CrossLauncher
 	exists_cross=$(pm list packages id.psw.vshlauncher | grep -c id.psw.vshlauncher)
 	if [ $exists_cross -eq 1 ]; then
-		pm set-home-activity "id.psw.vshlauncher/.activities.Xmb"
-		am start -a android.intent.action.MAIN -c android.intent.category.HOME
+		if [ ! -f /data/misc/crconfig/home ]; then
+			pm set-home-activity "id.psw.vshlauncher/id.psw.vshlauncher.activities.Xmb" || pm set-home-activity "id.psw.vshlauncher/.activities.Xmb"
+			am start-activity -f 0x10008000 id.psw.vshlauncher/id.psw.vshlauncher.activities.Xmb
+			am start -a android.intent.action.MAIN -c android.intent.category.HOME
+			mkdir -p /data/misc/crconfig
+			touch /data/misc/crconfig/home
+			chown 1000.1000 /data/misc/crconfig /data/misc/crconfig/*
+			chmod 775 /data/misc/crconfig
+			chmod 664 /data/misc/sdconfig/home
+		fi
 	fi
 
 	# TV-Mode Launcher
@@ -329,12 +337,23 @@ set_custom_package_perms()
 		fi
 	fi
 
+	# Vapor Launcher
+	exists_vapor=$(pm list packages org.vapor.android | grep -c org.vapor.android)
+	if [ $exists_vapor -eq 1 ]; then
+		# set launcher
+		SET_VAPOR_DEFAULT=$(getprop persist.glodroid.set_vapor_default)
+		[ -n "$SET_VAPOR_DEFAULT" ] && pm set-home-activity "org.vapor.android/.AppWorker" || pm set-home-activity "com.android.launcher3/.LauncherProvider"
+		am start -a android.intent.action.MAIN -c android.intent.category.HOME
+	fi
+
 }
 
 POST_INST=/data/vendor/post_inst_complete
 USER_APPS=/system/etc/user_app/*
 BUILD_DATETIME=$(getprop ro.build.date.utc)
 POST_INST_NUM=$(cat $POST_INST)
+
+set_custom_package_perms
 
 if [ ! "$BUILD_DATETIME" == "$POST_INST_NUM" ]; then
 	# GD apps
@@ -356,5 +375,4 @@ if [ ! "$BUILD_DATETIME" == "$POST_INST_NUM" ]; then
 	echo $BUILD_DATETIME > "$POST_INST"
 fi
 
-set_custom_package_perms
 
